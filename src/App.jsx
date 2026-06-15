@@ -176,7 +176,7 @@ function HomePage({ goToPage }) {
       <section className="section twoColumnSection">
         <div>
           <p className="eyebrow">The problem</p>
-          <h2>Donors want to help, but pantry needs change quickly.</h2>
+          <h2>Donors want to help, but pantries’ needs change quickly.</h2>
         </div>
 
         <div>

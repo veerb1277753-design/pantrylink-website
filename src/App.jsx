@@ -1,9 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./index.css";
 
 import logo from "./assets/pantrylink-logo.png";
 import pantryPhoto from "./assets/pantry-photo.png";
 import communityPhoto from "./assets/community-photo.png";
+
+const FORM_URL =
+  "https://docs.google.com/forms/d/e/1FAIpQLSce1z4CvQs8dG3d0_rFBdlaI65ad36n1Wr67GjTma2T7GKn4g/viewform?usp=publish-editor";
+
+const FORM_EMBED_URL =
+  "https://docs.google.com/forms/d/e/1FAIpQLSce1z4CvQs8dG3d0_rFBdlaI65ad36n1Wr67GjTma2T7GKn4g/viewform?embedded=true";
+
+const SUPPORT_EMAIL = "pantrylinkgeorgia@gmail.com";
+
+const DELETE_ACCOUNT_MAILTO = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
+  "PantryLink Account Deletion Request"
+)}&body=${encodeURIComponent(
+  "Hello PantryLink team,\n\nI am requesting deletion of my PantryLink account and associated data.\n\nName:\nEmail used for PantryLink:\nOrganization, if applicable:\n\nThank you."
+)}`;
 
 const navItems = [
   { id: "home", label: "Home" },
@@ -11,6 +25,19 @@ const navItems = [
   { id: "pantries", label: "For Pantries" },
   { id: "pilot", label: "Pilot Program" },
   { id: "contact", label: "Contact" },
+];
+
+const footerLegalItems = [
+  { id: "privacy", label: "Privacy Policy & Data Deletion" },
+];
+
+const allPageIds = [
+  "home",
+  "how",
+  "pantries",
+  "pilot",
+  "contact",
+  "privacy",
 ];
 
 const workflowSteps = [
@@ -39,14 +66,55 @@ const pantryBenefits = [
   "Give early feedback that shapes how PantryLink is built",
 ];
 
+function getPageFromHash() {
+  const hash = window.location.hash.replace("#", "");
+
+  if (hash === "delete-account" || hash === "data-deletion") {
+    return "privacy";
+  }
+
+  return allPageIds.includes(hash) ? hash : "home";
+}
+
 function App() {
-  const [activePage, setActivePage] = useState("home");
+  const [activePage, setActivePage] = useState(getPageFromHash);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    function handleHashChange() {
+      setActivePage(getPageFromHash());
+      setMenuOpen(false);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
+
+  useEffect(() => {
+    const titles = {
+    home: "PantryLink | Food Donation Coordination",
+    how: "How It Works | PantryLink",
+    pantries: "For Pantries | PantryLink",
+    pilot: "Pilot Program | PantryLink",
+    contact: "Contact | PantryLink",
+    privacy: "Privacy Policy & Data Deletion | PantryLink",
+  };
+
+    document.title = titles[activePage] || "PantryLink";
+  }, [activePage]);
 
   function goToPage(page) {
     setActivePage(page);
     setMenuOpen(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    if (page === "home") {
+      window.history.pushState("", document.title, window.location.pathname);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    window.location.hash = page;
   }
 
   return (
@@ -64,6 +132,7 @@ function App() {
         {activePage === "pantries" && <PantriesPage goToPage={goToPage} />}
         {activePage === "pilot" && <PilotPage goToPage={goToPage} />}
         {activePage === "contact" && <ContactPage />}
+        {activePage === "privacy" && <PrivacyPolicyPage goToPage={goToPage} />}
       </main>
 
       <Footer goToPage={goToPage} />
@@ -176,7 +245,7 @@ function HomePage({ goToPage }) {
       <section className="section twoColumnSection">
         <div>
           <p className="eyebrow">The problem</p>
-          <h2>Donors want to help, but pantries’ needs change quickly.</h2>
+          <h2>Donors want to help, but pantry needs change quickly.</h2>
         </div>
 
         <div>
@@ -210,7 +279,10 @@ function HomePage({ goToPage }) {
 
       <section className="section imageSection">
         <div className="imageWrap">
-          <img src={communityPhoto} alt="Community members supporting food donations" />
+          <img
+            src={communityPhoto}
+            alt="Community members supporting food donations"
+          />
         </div>
 
         <div>
@@ -256,7 +328,7 @@ function HowItWorksPage({ goToPage }) {
     {
       number: "03",
       title: "Donors claim items they can provide",
-      text: "When a donor claims a requested item, the pantry gets a clearer signal of what support may be coming in. This does not need to be complicated; it simply helps both sides coordinate around specific needs.",
+      text: "When a donor claims a requested item, the pantry gets a clearer signal of what support may be coming in. This simply helps both sides coordinate around specific needs.",
       detail: "Example: A donor claims 6 rice bags and plans to bring them this week.",
     },
     {
@@ -276,8 +348,8 @@ function HowItWorksPage({ goToPage }) {
           <p>
             PantryLink is built around a simple request-and-claim workflow.
             Pantries communicate what they need, donors respond to specific
-            requests, and both sides get a clearer process than relying on
-            broad donation lists or guesswork.
+            requests, and both sides get a clearer process than relying on broad
+            donation lists or guesswork.
           </p>
 
           <div className="buttonRow">
@@ -542,9 +614,6 @@ function PilotPage({ goToPage }) {
 }
 
 function ContactPage() {
-  const googleFormUrl =
-    "https://docs.google.com/forms/d/e/1FAIpQLSezzmkpouSjRnPgbkaaBsz306BPCw5RtSL4DnCMoUOe-paqew/viewform?embedded=true";
-
   return (
     <section className="pageWrap pageFade">
       <PageHero
@@ -553,73 +622,46 @@ function ContactPage() {
         text="Use this page for early partner interest, pilot feedback, community outreach, or general questions about the project."
       />
 
-      <section className="contactSection contactSectionWithForm">
-        <div className="contactCopy">
+      <section className="contactSection updatedContactSection">
+        <div>
           <p className="eyebrow">Get involved</p>
-
-          <h2>Help shape PantryLink before launch.</h2>
-
+          <h2>Help shape the platform before launch.</h2>
           <p>
-            PantryLink is currently focused on learning from organizations that
-            understand food donation needs firsthand. If you represent a pantry,
-            food bank, shelter, school club, nonprofit, or community group, this
-            form is the best place to start.
+            PantryLink is focused on learning from organizations that understand
+            food donation needs firsthand. If you represent a pantry, food bank,
+            shelter, school club, nonprofit, or community group, this is the
+            best place to start.
           </p>
 
-          <p>
-            The goal is to connect with early partners, gather practical
-            feedback, and understand what features would actually help pantries
-            communicate donation needs more clearly.
-          </p>
+          <div className="buttonRow">
+            <ExternalButton href={FORM_URL}>Open interest form</ExternalButton>
+          </div>
 
           <div className="contactCards">
             <div>
-              <strong>Pantries and food banks</strong>
-              <p>
-                Share what donation coordination looks like for your
-                organization.
-              </p>
+              <strong>Pantries</strong>
+              <p>Share what features would actually help your workflow.</p>
             </div>
-
             <div>
               <strong>Community partners</strong>
-              <p>
-                Reach out about outreach, donation drives, volunteering, or
-                pilot feedback.
-              </p>
+              <p>Discuss outreach, donation drives, or local support.</p>
             </div>
           </div>
         </div>
 
-        <div
-          className="embeddedFormPanel"
-          style={{
-            width: "100%",
-            height: "1120px",
-            minHeight: "1120px",
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-          }}
-        >
-          <div className="embeddedFormHeader">
+        <div className="formEmbedCard">
+          <div className="formEmbedHeader">
             <span>PantryLink interest form</span>
-            <p>Submit your response through the Google Form below.</p>
+            <p>
+              Fill out the form below, or open it in a new tab if the embedded
+              form does not load correctly.
+            </p>
           </div>
 
           <iframe
-            className="embeddedGoogleForm"
-            src={googleFormUrl}
             title="PantryLink interest form"
+            src={FORM_EMBED_URL}
             loading="lazy"
-            style={{
-              width: "100%",
-              height: "100%",
-              flex: "1 1 auto",
-              border: "0",
-              display: "block",
-              background: "white",
-            }}
           >
             Loading…
           </iframe>
@@ -628,6 +670,142 @@ function ContactPage() {
     </section>
   );
 }
+
+function PrivacyPolicyPage() {
+  return (
+    <section className="pageWrap pageFade">
+      <PageHero
+        label="Privacy policy & data deletion"
+        title="Privacy Policy and Data Deletion for PantryLink."
+        text="This page explains what information PantryLink may collect, how that information may be used, and how users can request deletion of their account and associated data."
+      />
+
+      <section className="legalPage">
+        <p className="legalUpdated">Last updated: June 22, 2026</p>
+
+        <LegalSection title="1. Overview">
+          <p>
+            PantryLink is designed to help food pantries, food banks, community
+            organizations, and donors communicate donation needs more clearly.
+            This Privacy Policy explains how PantryLink collects, uses, and
+            protects information submitted through the PantryLink app, website,
+            contact forms, and related services.
+          </p>
+        </LegalSection>
+
+        <LegalSection title="2. Information we may collect">
+          <p>Depending on how you use PantryLink, we may collect:</p>
+          <ul>
+            <li>Name, email address, and account login information.</li>
+            <li>Organization name, pantry location, role, and contact details.</li>
+            <li>
+              Donation requests, item names, quantities, urgency labels, and
+              request status.
+            </li>
+            <li>
+              Donor activity, such as claimed items or submitted interest forms.
+            </li>
+            <li>
+              Messages or information submitted through Google Forms or contact
+              pages.
+            </li>
+            <li>
+              Basic technical information such as device, browser, and usage
+              data used to improve reliability and security.
+            </li>
+          </ul>
+        </LegalSection>
+
+        <LegalSection title="3. How we use information">
+          <p>PantryLink may use collected information to:</p>
+          <ul>
+            <li>Create and manage user accounts.</li>
+            <li>Help pantries publish and update donation needs.</li>
+            <li>Help donors view, claim, or respond to posted requests.</li>
+            <li>Contact interested pantries, donors, and community partners.</li>
+            <li>
+              Improve the safety, reliability, and usefulness of the platform.
+            </li>
+            <li>
+              Respond to support, privacy, and account deletion requests.
+            </li>
+          </ul>
+        </LegalSection>
+
+        <LegalSection title="4. Sharing of information">
+          <p>
+            PantryLink does not sell user personal information. Information may
+            be shared only when needed to operate the service, communicate
+            donation needs, comply with legal obligations, prevent misuse, or
+            work with service providers that help host, process, or maintain the
+            platform.
+          </p>
+        </LegalSection>
+
+        <LegalSection title="5. Third-party services">
+          <p>
+            PantryLink may use third-party services such as hosting providers,
+            databases, authentication tools, analytics tools, email tools, and
+            Google Forms. These services may process information according to
+            their own privacy and security practices.
+          </p>
+        </LegalSection>
+
+        <LegalSection title="6. Data retention">
+          <p>
+            PantryLink keeps information only as long as reasonably needed to
+            operate the service, support users, maintain records, prevent misuse,
+            or meet legal and safety obligations. Some information may be
+            retained for legitimate reasons such as security, fraud prevention,
+            backup recovery, or compliance.
+          </p>
+        </LegalSection>
+
+        <LegalSection title="7. Account and data deletion">
+          <p>
+            Users may request deletion of their PantryLink account and associated
+            data by emailing PantryLink. To help identify the correct account,
+            the request should include the user’s full name, the email address
+            used for PantryLink, and the organization name if the account is
+            connected to a pantry or community group.
+          </p>
+
+          <p>
+            Depending on the account type and usage, deletion may include account
+            profile information, pantry or organization details, donation
+            requests, claim history, and related account activity.
+          </p>
+
+          <p>
+            PantryLink may retain limited information when necessary for
+            legitimate purposes such as security, fraud prevention, legal
+            compliance, dispute resolution, backup recovery, or protection of the
+            service and its users.
+          </p>
+
+          <div className="buttonRow">
+            <a
+              className="animatedButton primary linkButton"
+              href={DELETE_ACCOUNT_MAILTO}
+            >
+              <span>Email account deletion request</span>
+              <span className="buttonArrow">→</span>
+            </a>
+          </div>
+        </LegalSection>
+
+        <LegalSection title="8. Contact">
+          <p>
+            For privacy questions, account deletion requests, or data-related
+            concerns, contact PantryLink at{" "}
+            <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.
+          </p>
+        </LegalSection>
+      </section>
+    </section>
+  );
+}
+
 
 function PageHero({ label, title, text }) {
   return (
@@ -680,6 +858,15 @@ function RequestItem({ item, note }) {
   );
 }
 
+function LegalSection({ title, children }) {
+  return (
+    <article className="legalSection">
+      <h2>{title}</h2>
+      {children}
+    </article>
+  );
+}
+
 function AnimatedButton({ children, onClick, variant = "primary" }) {
   return (
     <button
@@ -690,6 +877,20 @@ function AnimatedButton({ children, onClick, variant = "primary" }) {
       <span>{children}</span>
       <span className="buttonArrow">→</span>
     </button>
+  );
+}
+
+function ExternalButton({ href, children }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="animatedButton primary linkButton"
+    >
+      <span>{children}</span>
+      <span className="buttonArrow">→</span>
+    </a>
   );
 }
 
@@ -711,12 +912,22 @@ function Footer({ goToPage }) {
         </p>
       </div>
 
-      <div className="footerLinks">
-        {navItems.map((item) => (
-          <button key={item.id} type="button" onClick={() => goToPage(item.id)}>
-            {item.label}
-          </button>
-        ))}
+      <div className="footerNavGroup">
+        <div className="footerLinks">
+          {navItems.map((item) => (
+            <button key={item.id} type="button" onClick={() => goToPage(item.id)}>
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="footerLinks legalFooterLinks">
+          {footerLegalItems.map((item) => (
+            <button key={item.id} type="button" onClick={() => goToPage(item.id)}>
+              {item.label}
+            </button>
+          ))}
+        </div>
       </div>
     </footer>
   );

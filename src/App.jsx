@@ -13,10 +13,24 @@ const FORM_EMBED_URL =
 
 const SUPPORT_EMAIL = "pantrylinkgeorgia@gmail.com";
 
+const DELETE_ACCOUNT_SUBJECT = "PantryLink Account and Data Deletion Request";
+
+const DELETE_ACCOUNT_BODY =
+  "Hello PantryLink team,\n\n" +
+  "I am requesting deletion of my PantryLink account and associated data.\n\n" +
+  "Name:\n" +
+  "Email used for PantryLink:\n" +
+  "Organization, if applicable:\n\n" +
+  "Thank you.";
+
 const DELETE_ACCOUNT_MAILTO = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
-  "PantryLink Account Deletion Request"
-)}&body=${encodeURIComponent(
-  "Hello PantryLink team,\n\nI am requesting deletion of my PantryLink account and associated data.\n\nName:\nEmail used for PantryLink:\nOrganization, if applicable:\n\nThank you."
+  DELETE_ACCOUNT_SUBJECT
+)}&body=${encodeURIComponent(DELETE_ACCOUNT_BODY)}`;
+
+const DELETE_ACCOUNT_GMAIL_URL = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
+  SUPPORT_EMAIL
+)}&su=${encodeURIComponent(DELETE_ACCOUNT_SUBJECT)}&body=${encodeURIComponent(
+  DELETE_ACCOUNT_BODY
 )}`;
 
 const navItems = [
@@ -125,7 +139,6 @@ function App() {
         menuOpen={menuOpen}
         setMenuOpen={setMenuOpen}
       />
-
       <main>
         {activePage === "home" && <HomePage goToPage={goToPage} />}
         {activePage === "how" && <HowItWorksPage goToPage={goToPage} />}
@@ -194,6 +207,15 @@ function HomePage({ goToPage }) {
             needs to local donors. The goal is to make giving more specific,
             more useful, and easier to coordinate.
           </p>
+
+        <div className="heroStatusNote">
+          <span>App in development</span>
+            <p>
+                PantryLink is currently being built. This launch site helps us connect with
+                early pantry partners, donors, and community members before the app’s wider
+                release.
+            </p>
+        </div>
 
           <div className="buttonRow">
             <AnimatedButton onClick={() => goToPage("contact")}>
@@ -636,7 +658,6 @@ function ContactPage() {
           <div className="buttonRow">
             <ExternalButton href={FORM_URL}>Open interest form</ExternalButton>
           </div>
-
           <div className="contactCards">
             <div>
               <strong>Pantries</strong>
@@ -762,37 +783,48 @@ function PrivacyPolicyPage() {
         </LegalSection>
 
         <LegalSection title="7. Account and data deletion">
-          <p>
-            Users may request deletion of their PantryLink account and associated
-            data by emailing PantryLink. To help identify the correct account,
-            the request should include the user’s full name, the email address
-            used for PantryLink, and the organization name if the account is
-            connected to a pantry or community group.
-          </p>
+  <p>
+    Users may request deletion of their PantryLink account and associated
+    data by contacting the PantryLink team. To help identify the correct
+    information, the request should include the user’s full name, the email
+    address used for PantryLink, and the organization name if the account is
+    connected to a pantry or community group.
+  </p>
 
-          <p>
-            Depending on the account type and usage, deletion may include account
-            profile information, pantry or organization details, donation
-            requests, claim history, and related account activity.
-          </p>
+  <p>
+    Depending on the account type and usage, deletion may include account
+    profile information, pantry or organization details, donation requests,
+    claim history, and related account activity.
+  </p>
 
-          <p>
-            PantryLink may retain limited information when necessary for
-            legitimate purposes such as security, fraud prevention, legal
-            compliance, dispute resolution, backup recovery, or protection of the
-            service and its users.
-          </p>
+  <p>
+    PantryLink may retain limited information when necessary for legitimate
+    purposes such as security, fraud prevention, legal compliance, dispute
+    resolution, backup recovery, or protection of the service and its users.
+  </p>
 
-          <div className="buttonRow">
-            <a
-              className="animatedButton primary linkButton"
-              href={DELETE_ACCOUNT_MAILTO}
-            >
-              <span>Email account deletion request</span>
-              <span className="buttonArrow">→</span>
-            </a>
-          </div>
-        </LegalSection>
+  <div className="deletionActionBox">
+  <a
+    className="animatedButton primary linkButton"
+    href={DELETE_ACCOUNT_GMAIL_URL}
+    target="_blank"
+    rel="noreferrer"
+  >
+    <span>Open Gmail deletion request</span>
+    <span className="buttonArrow">→</span>
+  </a>
+
+  <a className="deletionBackupLink" href={DELETE_ACCOUNT_MAILTO}>
+    Use default email app instead
+  </a>
+
+  <p className="deletionFallbackText">
+    If the button does not open correctly, email{" "}
+    <strong>{SUPPORT_EMAIL}</strong> with the subject line{" "}
+    <strong>{DELETE_ACCOUNT_SUBJECT}</strong>.
+  </p>
+</div>
+</LegalSection>
 
         <LegalSection title="8. Contact">
           <p>

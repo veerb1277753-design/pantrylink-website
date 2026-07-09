@@ -1512,3 +1512,84 @@ p {
     grid-template-columns: 1fr;
   }
 }
+.deletionActionBox {
+  margin-top: 28px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  border: 1px solid rgba(244, 124, 32, 0.26);
+  border-radius: 24px;
+  background: rgba(255, 154, 61, 0.1);
+}
+
+.deletionActionBox .animatedButton {
+  position: relative;
+  z-index: 5;
+  pointer-events: auto;
+}
+
+.deletionBackupLink {
+  color: var(--green-800);
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.deletionBackupLink:hover {
+  text-decoration: underline;
+}
+
+.deletionFallbackText {
+  flex-basis: 100%;
+  margin: 4px 0 0;
+  color: var(--gray-500);
+  font-size: 0.95rem;
+}
+
+.deletionFallbackText strong {
+  color: var(--green-950);
+}
+
+a.animatedButton,
+.linkButton {
+  text-decoration: none;
+}
+
+@media (max-width: 760px) {
+  .deletionActionBox {
+    align-items: stretch;
+  }
+
+  .deletionActionBox .animatedButton,
+  .deletionBackupLink {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+  .heroStatusNote {
+  max-width: 680px;
+  margin: 26px 0 0;
+  padding: 22px 24px;
+  border: 1px solid rgba(244, 124, 32, 0.28);
+  border-radius: 22px;
+  background: rgba(255, 154, 61, 0.09);
+}
+
+.heroStatusNote span {
+  display: block;
+  margin-bottom: 8px;
+  color: #0b3d25;
+  font-size: 1.25rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-transform: none;
+}
+
+.heroStatusNote p {
+  margin: 0;
+  color: var(--gray-500);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+}

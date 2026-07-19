@@ -1,968 +1,238 @@
 import { useEffect, useState } from "react";
-import "./index.css";
 
 import logo from "./assets/pantrylink-logo.png";
-import pantryPhoto from "./assets/pantry-photo.png";
-import communityPhoto from "./assets/community-photo.png";
+import dashboardShot from "./assets/app-dashboard.png";
+import mapShot from "./assets/app-map-finder.png";
+import needsShot from "./assets/app-needs.png";
+import claimsShot from "./assets/app-my-claims.png";
+import profileShot from "./assets/app-account-profile.png";
+import settingsShot from "./assets/app-account-settings.png";
+import signInShot from "./assets/app-sign-in.png";
 
-const FORM_URL =
-  "https://docs.google.com/forms/d/e/1FAIpQLSce1z4CvQs8dG3d0_rFBdlaI65ad36n1Wr67GjTma2T7GKn4g/viewform?usp=publish-editor";
-
-const FORM_EMBED_URL =
-  "https://docs.google.com/forms/d/e/1FAIpQLSce1z4CvQs8dG3d0_rFBdlaI65ad36n1Wr67GjTma2T7GKn4g/viewform?embedded=true";
-
+const APP_STORE_URL = "https://apps.apple.com/us/app/pantrylink-ga/id6789333323";
+const CONTACT_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSce1z4CvQs8dG3d0_rFBdlaI65ad36n1Wr67GjTma2T7GKn4g/viewform?embedded=true";
 const SUPPORT_EMAIL = "pantrylinkgeorgia@gmail.com";
 
-const DELETE_ACCOUNT_SUBJECT = "PantryLink Account and Data Deletion Request";
-
-const DELETE_ACCOUNT_BODY =
-  "Hello PantryLink team,\n\n" +
-  "I am requesting deletion of my PantryLink account and associated data.\n\n" +
-  "Name:\n" +
-  "Email used for PantryLink:\n" +
-  "Organization, if applicable:\n\n" +
-  "Thank you.";
-
-const DELETE_ACCOUNT_MAILTO = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
-  DELETE_ACCOUNT_SUBJECT
-)}&body=${encodeURIComponent(DELETE_ACCOUNT_BODY)}`;
-
-const DELETE_ACCOUNT_GMAIL_URL = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
-  SUPPORT_EMAIL
-)}&su=${encodeURIComponent(DELETE_ACCOUNT_SUBJECT)}&body=${encodeURIComponent(
-  DELETE_ACCOUNT_BODY
-)}`;
-
 const navItems = [
-  { id: "home", label: "Home" },
-  { id: "how", label: "How It Works" },
-  { id: "pantries", label: "For Pantries" },
-  { id: "pilot", label: "Pilot Program" },
-  { id: "contact", label: "Contact" },
+  ["home", "Home"],
+  ["how-it-works", "How It Works"],
+  ["for-pantries", "For Pantries"],
+  ["contact", "Contact"],
 ];
 
-const footerLegalItems = [
-  { id: "privacy", label: "Privacy Policy & Data Deletion" },
-];
-
-const allPageIds = [
-  "home",
-  "how",
-  "pantries",
-  "pilot",
-  "contact",
-  "privacy",
-];
-
-const workflowSteps = [
-  {
-    number: "01",
-    title: "Pantries share current needs",
-    text: "A pantry, food bank, shelter, or community organization can post the items it currently needs most. Instead of relying only on a broad donation list, the organization can communicate specific items, quantities, urgency, and whether the request is temporary or ongoing.",
-  },
-  {
-    number: "02",
-    title: "Donors see specific requests",
-    text: "Local donors can view clear requests before they shop, collect items, or drop off donations. This helps donors understand what would actually be useful instead of guessing what an organization may need.",
-  },
-  {
-    number: "03",
-    title: "Support becomes easier to coordinate",
-    text: "When donors claim specific items, pantries get a clearer picture of what may be coming in. The goal is to make incoming support easier to manage while helping donors contribute in a more intentional way.",
-  },
-];
-
-const pantryBenefits = [
-  "Post specific food or supply requests based on current demand",
-  "Mark items as urgent, ongoing, claimed, or fulfilled",
-  "Help donors understand what would be most useful before they donate",
-  "Reduce mismatched donations that are difficult to store or use",
-  "Give early feedback that shapes how PantryLink is built",
-];
-
-function getPageFromHash() {
-  const hash = window.location.hash.replace("#", "");
-
-  if (hash === "delete-account" || hash === "data-deletion") {
-    return "privacy";
-  }
-
-  return allPageIds.includes(hash) ? hash : "home";
+function Icon({ name }) {
+  const paths = {
+    arrow: <><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></>,
+    check: <path d="m5 12 4 4L19 6"/>,
+    map: <><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3Z"/><path d="M9 3v15M15 6v15"/></>,
+    heart: <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/>,
+    box: <><path d="m21 8-9 5-9-5 9-5 9 5Z"/><path d="m3 8 9 5 9-5M3 8v8l9 5 9-5V8M12 13v8"/></>,
+    people: <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></>,
+    bell: <><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></>,
+    shield: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/>,
+    trash: <><path d="M3 6h18M8 6V4h8v2M19 6l-1 15H6L5 6M10 11v6M14 11v6"/></>,
+    mail: <><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></>,
+    apple: <path fill="currentColor" stroke="none" d="M16.7 12.8c0-2.8 2.3-4.2 2.4-4.3-1.3-1.9-3.4-2.2-4.1-2.2-1.7-.2-3.4 1-4.3 1-.9 0-2.3-1-3.8-1-1.9 0-3.7 1.1-4.7 2.8-2 3.5-.5 8.7 1.4 11.5.9 1.4 2.1 3 3.6 2.9 1.4-.1 2-1 3.8-1s2.3 1 3.8 1c1.6 0 2.6-1.4 3.5-2.8 1.1-1.6 1.5-3.1 1.5-3.2-.1 0-3.1-1.2-3.1-4.7Zm-2.8-8.3c.8-1 1.4-2.4 1.2-3.8-1.2.1-2.7.8-3.6 1.8-.8.9-1.4 2.3-1.2 3.7 1.4.1 2.8-.7 3.6-1.7Z"/>,
+  };
+  return <svg viewBox="0 0 24 24" aria-hidden="true">{paths[name]}</svg>;
 }
 
-function App() {
-  const [activePage, setActivePage] = useState(getPageFromHash);
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    function handleHashChange() {
-      setActivePage(getPageFromHash());
-      setMenuOpen(false);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    window.addEventListener("hashchange", handleHashChange);
-    return () => window.removeEventListener("hashchange", handleHashChange);
-  }, []);
-
-  useEffect(() => {
-    const titles = {
-    home: "PantryLink | Food Donation Coordination",
-    how: "How It Works | PantryLink",
-    pantries: "For Pantries | PantryLink",
-    pilot: "Pilot Program | PantryLink",
-    contact: "Contact | PantryLink",
-    privacy: "Privacy Policy & Data Deletion | PantryLink",
-  };
-
-    document.title = titles[activePage] || "PantryLink";
-  }, [activePage]);
-
-  function goToPage(page) {
-    setActivePage(page);
-    setMenuOpen(false);
-
-    if (page === "home") {
-      window.history.pushState("", document.title, window.location.pathname);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-
-    window.location.hash = page;
-  }
-
+function AppStoreButton({ compact = false, light = false }) {
   return (
-    <div className="site">
-      <Header
-        activePage={activePage}
-        goToPage={goToPage}
-        menuOpen={menuOpen}
-        setMenuOpen={setMenuOpen}
-      />
-      <main>
-        {activePage === "home" && <HomePage goToPage={goToPage} />}
-        {activePage === "how" && <HowItWorksPage goToPage={goToPage} />}
-        {activePage === "pantries" && <PantriesPage goToPage={goToPage} />}
-        {activePage === "pilot" && <PilotPage goToPage={goToPage} />}
-        {activePage === "contact" && <ContactPage />}
-        {activePage === "privacy" && <PrivacyPolicyPage goToPage={goToPage} />}
-      </main>
-
-      <Footer goToPage={goToPage} />
-    </div>
+    <a className={`store-button ${compact ? "compact" : ""} ${light ? "light" : ""}`} href={APP_STORE_URL} target="_blank" rel="noreferrer">
+      <Icon name="apple" />
+      <span><small>Download on the</small><strong>App Store</strong></span>
+    </a>
   );
 }
 
-function Header({ activePage, goToPage, menuOpen, setMenuOpen }) {
+function Header({ page, navigate }) {
+  const [open, setOpen] = useState(false);
+  const go = (id) => { setOpen(false); navigate(id); };
   return (
-    <header className="siteHeader">
-      <div className="headerInner">
-        <button type="button" className="brand" onClick={() => goToPage("home")}>
+    <header className="site-header">
+      <div className="nav-wrap">
+        <button className="brand" onClick={() => go("home")}>
           <img src={logo} alt="PantryLink logo" />
-          <span>PantryLink</span>
+          <span>PantryLink <b>GA</b></span>
         </button>
-
-        <button
-          type="button"
-          className="menuButton"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle navigation menu"
-        >
-          <span />
-          <span />
-          <span />
-        </button>
-
-        <nav className={menuOpen ? "navLinks open" : "navLinks"}>
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={activePage === item.id ? "navItem active" : "navItem"}
-              onClick={() => goToPage(item.id)}
-            >
-              {item.label}
-            </button>
-          ))}
+        <button className={`menu-button ${open ? "open" : ""}`} onClick={() => setOpen(!open)} aria-label="Toggle navigation"><i/><i/><i/></button>
+        <nav className={open ? "open" : ""}>
+          {navItems.map(([id, label]) => <button key={id} className={page === id ? "active" : ""} onClick={() => go(id)}>{label}</button>)}
+          <AppStoreButton compact />
         </nav>
       </div>
     </header>
   );
 }
 
-function HomePage({ goToPage }) {
+function Footer({ navigate }) {
   return (
-    <div className="pageFade">
-      <section className="hero">
-        <div className="heroText">
-          <p className="eyebrow">Built for local food support</p>
-
-          <h1>
-            Helping pantries share what they <span>actually need.</span>
-          </h1>
-
-          <p className="leadText">
-            PantryLink is a developing platform that helps food banks, pantries,
-            shelters, and community organizations communicate real donation
-            needs to local donors. The goal is to make giving more specific,
-            more useful, and easier to coordinate.
-          </p>
-
-        <div className="heroStatusNote">
-          <span>App in development</span>
-            <p>
-                PantryLink is currently being built. This launch site helps us connect with
-                early pantry partners, donors, and community members before the app’s wider
-                release.
-            </p>
-        </div>
-
-          <div className="buttonRow">
-            <AnimatedButton onClick={() => goToPage("contact")}>
-              Partner with PantryLink
-            </AnimatedButton>
-
-            <AnimatedButton variant="secondary" onClick={() => goToPage("how")}>
-              See how it works
-            </AnimatedButton>
-          </div>
-
-          <div className="heroNotes">
-            <div>
-              <strong>For pantries</strong>
-              <p>Post current needs and urgent requests.</p>
-            </div>
-            <div>
-              <strong>For donors</strong>
-              <p>Know what to bring before donating.</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="heroVisual">
-          <div className="photoCard floating">
-            <img src={pantryPhoto} alt="Food pantry shelves and donations" />
-          </div>
-
-          <div className="requestPanel floatingTwo">
-            <div className="requestHeader">
-              <img src={logo} alt="" />
-              <div>
-                <p>Pantry Need Board</p>
-                <strong>Today’s Requests</strong>
-              </div>
-            </div>
-
-            <RequestItem item="Canned vegetables" note="High priority" />
-            <RequestItem item="Rice and pasta" note="Needed this week" />
-            <RequestItem item="Peanut butter" note="12 requested" />
-
-            <button type="button" className="panelButton">
-              View requests
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <section className="section twoColumnSection">
-        <div>
-          <p className="eyebrow">The problem</p>
-          <h2>Donors want to help, but pantry needs change quickly.</h2>
-        </div>
-
-        <div>
-          <p>
-            Many donors are willing to support food banks and pantries, but they
-            often only see general donation lists or outdated information. In
-            reality, a pantry may have enough of one item while urgently needing
-            another.
-          </p>
-          <p>
-            PantryLink is designed to close that communication gap by helping
-            organizations publish specific requests that donors can understand
-            before they donate.
-          </p>
-        </div>
-      </section>
-
-      <section className="section">
-        <SectionHeader
-          label="How it works"
-          title="A simple request-and-claim workflow."
-          text="The platform is built around a practical donation flow. Pantries share what they need, donors see specific requests, and incoming support becomes easier to coordinate."
-        />
-
-        <div className="cardGrid">
-          {workflowSteps.map((step) => (
-            <StepCard key={step.number} {...step} />
-          ))}
-        </div>
-      </section>
-
-      <section className="section imageSection">
-        <div className="imageWrap">
-          <img
-            src={communityPhoto}
-            alt="Community members supporting food donations"
-          />
-        </div>
-
-        <div>
-          <p className="eyebrow">Early pantry partners</p>
-          <h2>Built with feedback before a wider launch.</h2>
-          <p>
-            PantryLink is currently focused on learning from pantries, food
-            banks, shelters, and community organizations. Early partners can
-            help shape how request posting, donor communication, and donation
-            coordination should actually work.
-          </p>
-          <p>
-            The first version is not meant to be complicated. It is meant to
-            test whether a clearer request system can help organizations receive
-            better-matched donations from people who already want to help.
-          </p>
-
-          <div className="buttonRow">
-            <AnimatedButton onClick={() => goToPage("pilot")}>
-              View pilot program
-            </AnimatedButton>
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function HowItWorksPage({ goToPage }) {
-  const workflow = [
-    {
-      number: "01",
-      title: "A pantry posts a specific need",
-      text: "Instead of relying on a broad donation list, a pantry can post the exact items it needs right now. A request can include the item name, quantity, urgency level, and any short note that helps donors understand why the item matters.",
-      detail: "Example: 24 jars of peanut butter needed before Friday distribution.",
-    },
-    {
-      number: "02",
-      title: "Donors see what would actually help",
-      text: "Local donors can view current requests before they shop, collect items, or drop off donations. This helps remove the guesswork from donating and gives donors a more practical way to support organizations near them.",
-      detail: "Example: Donors can see which items are urgent, open, claimed, or fulfilled.",
-    },
-    {
-      number: "03",
-      title: "Donors claim items they can provide",
-      text: "When a donor claims a requested item, the pantry gets a clearer signal of what support may be coming in. This simply helps both sides coordinate around specific needs.",
-      detail: "Example: A donor claims 6 rice bags and plans to bring them this week.",
-    },
-    {
-      number: "04",
-      title: "The pantry updates requests as needs change",
-      text: "After donations arrive or inventory changes, the pantry can update the request status. This keeps the information accurate and helps prevent donors from bringing items that are no longer needed.",
-      detail: "Example: An urgent request becomes fulfilled once enough items arrive.",
-    },
-  ];
-
-  return (
-    <section className="pageWrap pageFade">
-      <section className="howPageHero">
-        <div className="howHeroText">
-          <p className="eyebrow">How it works</p>
-          <h1>A clearer donation process from request to drop-off.</h1>
-          <p>
-            PantryLink is built around a simple request-and-claim workflow.
-            Pantries communicate what they need, donors respond to specific
-            requests, and both sides get a clearer process than relying on broad
-            donation lists or guesswork.
-          </p>
-
-          <div className="buttonRow">
-            <AnimatedButton onClick={() => goToPage("contact")}>
-              Talk to PantryLink
-            </AnimatedButton>
-            <AnimatedButton variant="secondary" onClick={() => goToPage("pantries")}>
-              For pantries
-            </AnimatedButton>
-          </div>
-        </div>
-
-        <div className="workflowPreviewCard">
-          <div className="previewTop">
-            <img src={logo} alt="" />
-            <div>
-              <span>PantryLink workflow</span>
-              <strong>Request status</strong>
-            </div>
-          </div>
-
-          <div className="previewStep active">
-            <span>Request</span>
-            <p>Pantry posts a need</p>
-          </div>
-
-          <div className="previewStep">
-            <span>Claim</span>
-            <p>Donor chooses an item</p>
-          </div>
-
-          <div className="previewStep">
-            <span>Update</span>
-            <p>Pantry tracks status</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="howIntroSection">
-        <div className="howIntroImage">
-          <img src={pantryPhoto} alt="Food pantry shelves and donation supplies" />
-        </div>
-
-        <div className="howIntroText">
-          <p className="eyebrow">The core idea</p>
-          <h2>PantryLink supports the pantry’s process instead of replacing it.</h2>
-          <p>
-            A pantry may already know which items are running low, which
-            donations are less useful, and what will be needed before the next
-            distribution day. The problem is that donors may not have a reliable
-            way to see that information before giving.
-          </p>
-          <p>
-            PantryLink creates a simple bridge between those two sides. It gives
-            organizations a way to publish current needs and gives donors a way
-            to respond to those needs directly.
-          </p>
-        </div>
-      </section>
-
-      <section className="workflowSection">
-        <div className="sectionHeader centeredHeader">
-          <p className="eyebrow">Step-by-step workflow</p>
-          <h2>Four steps, one clearer donation path.</h2>
-          <p>
-            The workflow is intentionally simple. Each step is designed to help
-            pantries communicate needs clearly without adding a complicated new
-            system for staff, volunteers, or donors.
-          </p>
-        </div>
-
-        <div className="workflowGrid">
-          {workflow.map((step) => (
-            <article className="workflowCard" key={step.number}>
-              <div className="workflowNumber">{step.number}</div>
-              <h3>{step.title}</h3>
-              <p>{step.text}</p>
-              <div className="workflowExample">{step.detail}</div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="experienceSection">
-        <div>
-          <p className="eyebrow">What each side sees</p>
-          <h2>One platform, two simple experiences.</h2>
-          <p>
-            PantryLink should feel useful for pantries without becoming
-            overwhelming, and it should feel clear for donors without requiring
-            them to understand the pantry’s full internal process.
-          </p>
-        </div>
-
-        <div className="experienceGrid">
-          <div className="experienceCard">
-            <span>Pantry view</span>
-            <h3>Post and manage requests</h3>
-            <p>
-              Pantries can create item requests, add urgency, update quantities,
-              and mark requests as claimed or fulfilled as donations come in.
-            </p>
-          </div>
-
-          <div className="experienceCard orangeCard">
-            <span>Donor view</span>
-            <h3>Find and claim useful items</h3>
-            <p>
-              Donors can browse current needs, understand what is most urgent,
-              and claim items they are able to provide before dropping them off.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section className="ctaSection">
-        <h2>Want to help test the idea?</h2>
-        <p>
-          PantryLink is looking for feedback from organizations that understand
-          the real challenges of receiving and coordinating donations.
-        </p>
-        <AnimatedButton onClick={() => goToPage("contact")}>
-          Contact PantryLink
-        </AnimatedButton>
-      </section>
-    </section>
-  );
-}
-
-function PantriesPage({ goToPage }) {
-  return (
-    <section className="pageWrap pageFade">
-      <PageHero
-        label="For pantries"
-        title="A request tool built around real pantry needs."
-        text="PantryLink is being built for food banks, pantries, shelters, and community organizations that need a clearer way to communicate donation needs. The goal is to help organizations share specific requests with local donors without creating a complicated system that adds more work."
-      />
-
-      <section className="section imageSection reverseOnDesktop">
-        <div>
-          <p className="eyebrow">What pantries can do</p>
-          <h2>Share specific needs in a format donors can act on.</h2>
-          <p>
-            PantryLink gives organizations a more direct way to tell donors what
-            would be useful before donations arrive. Instead of depending only
-            on broad donation categories, pantries can post requests based on
-            current inventory, upcoming distribution needs, seasonal demand, or
-            items that are running low.
-          </p>
-
-          <div className="checkList">
-            {pantryBenefits.map((benefit) => (
-              <p key={benefit}>{benefit}</p>
-            ))}
-          </div>
-
-          <AnimatedButton onClick={() => goToPage("contact")}>
-            Become an early partner
-          </AnimatedButton>
-        </div>
-
-        <div className="imageWrap tallImage">
-          <img src={pantryPhoto} alt="Food pantry shelves and donations" />
-        </div>
-      </section>
-
-      <section className="section">
-        <SectionHeader
-          label="Designed to be realistic"
-          title="Support the pantry’s process, not replace it."
-          text="The early version is not meant to replace a pantry’s existing workflow or force staff into a complicated dashboard. It is meant to test whether a simple request-posting system can help pantries communicate needs more clearly, reduce mismatched donations, and build stronger connections with local supporters."
-        />
-
-        <div className="infoGrid">
-          <InfoCard
-            title="Low-friction posting"
-            text="Requests should be quick to create, easy to update, and clear enough for donors to understand without extra explanation."
-          />
-          <InfoCard
-            title="Local donor visibility"
-            text="The platform can help nearby donors see what community organizations actually need before they decide what to bring."
-          />
-          <InfoCard
-            title="Feedback-led development"
-            text="Early pantry partners can help decide which features are useful, which ones are unnecessary, and how simple the platform should stay."
-          />
-        </div>
-      </section>
-    </section>
-  );
-}
-
-function PilotPage({ goToPage }) {
-  return (
-    <section className="pageWrap pageFade">
-      <PageHero
-        label="Pilot program"
-        title="Looking for early organizations to help shape PantryLink."
-        text="Before a full launch, PantryLink needs feedback from food banks, pantries, shelters, and community organizations that understand how donation coordination works in real life."
-      />
-
-      <section className="section imageSection">
-        <div className="imageWrap">
-          <img src={communityPhoto} alt="Community volunteers supporting donations" />
-        </div>
-
-        <div>
-          <p className="eyebrow">Early testing</p>
-          <h2>The pilot is about learning what actually works.</h2>
-          <p>
-            The goal of the pilot is not to immediately create a perfect system.
-            It is to understand how pantries would use a donation request tool,
-            what information donors need, and how the platform can stay simple
-            enough to be useful.
-          </p>
-
-          <div className="numberList">
-            <div>
-              <strong>1</strong>
-              <p>Collect feedback from pantry staff, volunteers, and organizers.</p>
-            </div>
-            <div>
-              <strong>2</strong>
-              <p>Test how request posting should work in practice.</p>
-            </div>
-            <div>
-              <strong>3</strong>
-              <p>Refine the platform before expanding to more users.</p>
-            </div>
-          </div>
-
-          <AnimatedButton onClick={() => goToPage("contact")}>
-            Join the pilot conversation
-          </AnimatedButton>
-        </div>
-      </section>
-
-      <section className="section">
-        <SectionHeader
-          label="Who this is for"
-          title="PantryLink is looking for practical, honest feedback."
-          text="The best early partners are organizations that can explain what donation coordination looks like day to day: what donors get right, what they miss, and what would make incoming support easier to manage."
-        />
-
-        <div className="infoGrid">
-          <InfoCard
-            title="Food banks"
-            text="Organizations managing larger donation flows, recurring community needs, or multiple distribution programs."
-          />
-          <InfoCard
-            title="Local pantries"
-            text="Smaller organizations that need a clearer way to communicate specific item requests to nearby supporters."
-          />
-          <InfoCard
-            title="Community groups"
-            text="Groups supporting outreach, donation drives, school service projects, or volunteer-based food assistance."
-          />
-        </div>
-      </section>
-    </section>
-  );
-}
-
-function ContactPage() {
-  return (
-    <section className="pageWrap pageFade">
-      <PageHero
-        label="Contact"
-        title="Interested in PantryLink?"
-        text="Use this page for early partner interest, pilot feedback, community outreach, or general questions about the project."
-      />
-
-      <section className="contactSection updatedContactSection">
-        <div>
-          <p className="eyebrow">Get involved</p>
-          <h2>Help shape the platform before launch.</h2>
-          <p>
-            PantryLink is focused on learning from organizations that understand
-            food donation needs firsthand. If you represent a pantry, food bank,
-            shelter, school club, nonprofit, or community group, this is the
-            best place to start.
-          </p>
-
-          <div className="buttonRow">
-            <ExternalButton href={FORM_URL}>Open interest form</ExternalButton>
-          </div>
-          <div className="contactCards">
-            <div>
-              <strong>Pantries</strong>
-              <p>Share what features would actually help your workflow.</p>
-            </div>
-            <div>
-              <strong>Community partners</strong>
-              <p>Discuss outreach, donation drives, or local support.</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="formEmbedCard">
-          <div className="formEmbedHeader">
-            <span>PantryLink interest form</span>
-            <p>
-              Fill out the form below, or open it in a new tab if the embedded
-              form does not load correctly.
-            </p>
-          </div>
-
-          <iframe
-            title="PantryLink interest form"
-            src={FORM_EMBED_URL}
-            loading="lazy"
-          >
-            Loading…
-          </iframe>
-        </div>
-      </section>
-    </section>
-  );
-}
-
-function PrivacyPolicyPage() {
-  return (
-    <section className="pageWrap pageFade">
-      <PageHero
-        label="Privacy policy & data deletion"
-        title="Privacy Policy and Data Deletion for PantryLink."
-        text="This page explains what information PantryLink may collect, how that information may be used, and how users can request deletion of their account and associated data."
-      />
-
-      <section className="legalPage">
-        <p className="legalUpdated">Last updated: June 22, 2026</p>
-
-        <LegalSection title="1. Overview">
-          <p>
-            PantryLink is designed to help food pantries, food banks, community
-            organizations, and donors communicate donation needs more clearly.
-            This Privacy Policy explains how PantryLink collects, uses, and
-            protects information submitted through the PantryLink app, website,
-            contact forms, and related services.
-          </p>
-        </LegalSection>
-
-        <LegalSection title="2. Information we may collect">
-          <p>Depending on how you use PantryLink, we may collect:</p>
-          <ul>
-            <li>Name, email address, and account login information.</li>
-            <li>Organization name, pantry location, role, and contact details.</li>
-            <li>
-              Donation requests, item names, quantities, urgency labels, and
-              request status.
-            </li>
-            <li>
-              Donor activity, such as claimed items or submitted interest forms.
-            </li>
-            <li>
-              Messages or information submitted through Google Forms or contact
-              pages.
-            </li>
-            <li>
-              Basic technical information such as device, browser, and usage
-              data used to improve reliability and security.
-            </li>
-          </ul>
-        </LegalSection>
-
-        <LegalSection title="3. How we use information">
-          <p>PantryLink may use collected information to:</p>
-          <ul>
-            <li>Create and manage user accounts.</li>
-            <li>Help pantries publish and update donation needs.</li>
-            <li>Help donors view, claim, or respond to posted requests.</li>
-            <li>Contact interested pantries, donors, and community partners.</li>
-            <li>
-              Improve the safety, reliability, and usefulness of the platform.
-            </li>
-            <li>
-              Respond to support, privacy, and account deletion requests.
-            </li>
-          </ul>
-        </LegalSection>
-
-        <LegalSection title="4. Sharing of information">
-          <p>
-            PantryLink does not sell user personal information. Information may
-            be shared only when needed to operate the service, communicate
-            donation needs, comply with legal obligations, prevent misuse, or
-            work with service providers that help host, process, or maintain the
-            platform.
-          </p>
-        </LegalSection>
-
-        <LegalSection title="5. Third-party services">
-          <p>
-            PantryLink may use third-party services such as hosting providers,
-            databases, authentication tools, analytics tools, email tools, and
-            Google Forms. These services may process information according to
-            their own privacy and security practices.
-          </p>
-        </LegalSection>
-
-        <LegalSection title="6. Data retention">
-          <p>
-            PantryLink keeps information only as long as reasonably needed to
-            operate the service, support users, maintain records, prevent misuse,
-            or meet legal and safety obligations. Some information may be
-            retained for legitimate reasons such as security, fraud prevention,
-            backup recovery, or compliance.
-          </p>
-        </LegalSection>
-
-        <LegalSection title="7. Account and data deletion">
-  <p>
-    Users may request deletion of their PantryLink account and associated
-    data by contacting the PantryLink team. To help identify the correct
-    information, the request should include the user’s full name, the email
-    address used for PantryLink, and the organization name if the account is
-    connected to a pantry or community group.
-  </p>
-
-  <p>
-    Depending on the account type and usage, deletion may include account
-    profile information, pantry or organization details, donation requests,
-    claim history, and related account activity.
-  </p>
-
-  <p>
-    PantryLink may retain limited information when necessary for legitimate
-    purposes such as security, fraud prevention, legal compliance, dispute
-    resolution, backup recovery, or protection of the service and its users.
-  </p>
-
-  <div className="deletionActionBox">
-  <a
-    className="animatedButton primary linkButton"
-    href={DELETE_ACCOUNT_GMAIL_URL}
-    target="_blank"
-    rel="noreferrer"
-  >
-    <span>Open Gmail deletion request</span>
-    <span className="buttonArrow">→</span>
-  </a>
-
-  <a className="deletionBackupLink" href={DELETE_ACCOUNT_MAILTO}>
-    Use default email app instead
-  </a>
-
-  <p className="deletionFallbackText">
-    If the button does not open correctly, email{" "}
-    <strong>{SUPPORT_EMAIL}</strong> with the subject line{" "}
-    <strong>{DELETE_ACCOUNT_SUBJECT}</strong>.
-  </p>
-</div>
-</LegalSection>
-
-        <LegalSection title="8. Contact">
-          <p>
-            For privacy questions, account deletion requests, or data-related
-            concerns, contact PantryLink at{" "}
-            <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.
-          </p>
-        </LegalSection>
-      </section>
-    </section>
-  );
-}
-
-
-function PageHero({ label, title, text }) {
-  return (
-    <section className="pageHero">
-      <p className="eyebrow">{label}</p>
-      <h1>{title}</h1>
-      <p>{text}</p>
-    </section>
-  );
-}
-
-function SectionHeader({ label, title, text }) {
-  return (
-    <div className="sectionHeader">
-      <p className="eyebrow">{label}</p>
-      <h2>{title}</h2>
-      <p>{text}</p>
-    </div>
-  );
-}
-
-function StepCard({ number, title, text }) {
-  return (
-    <article className="stepCard">
-      <span>{number}</span>
-      <h3>{title}</h3>
-      <p>{text}</p>
-    </article>
-  );
-}
-
-function InfoCard({ title, text }) {
-  return (
-    <article className="infoCard">
-      <h3>{title}</h3>
-      <p>{text}</p>
-    </article>
-  );
-}
-
-function RequestItem({ item, note }) {
-  return (
-    <div className="requestItem">
-      <div>
-        <strong>{item}</strong>
-        <p>{note}</p>
-      </div>
-      <span />
-    </div>
-  );
-}
-
-function LegalSection({ title, children }) {
-  return (
-    <article className="legalSection">
-      <h2>{title}</h2>
-      {children}
-    </article>
-  );
-}
-
-function AnimatedButton({ children, onClick, variant = "primary" }) {
-  return (
-    <button
-      type="button"
-      className={`animatedButton ${variant}`}
-      onClick={onClick}
-    >
-      <span>{children}</span>
-      <span className="buttonArrow">→</span>
-    </button>
-  );
-}
-
-function ExternalButton({ href, children }) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noreferrer"
-      className="animatedButton primary linkButton"
-    >
-      <span>{children}</span>
-      <span className="buttonArrow">→</span>
-    </a>
-  );
-}
-
-function Footer({ goToPage }) {
-  return (
-    <footer className="footer">
-      <div>
-        <button
-          type="button"
-          className="footerBrand"
-          onClick={() => goToPage("home")}
-        >
+    <footer className="site-footer">
+      <div className="footer-grid">
+        <div className="footer-brand">
           <img src={logo} alt="PantryLink logo" />
-          <span>PantryLink</span>
-        </button>
-        <p>
-          Helping local food support organizations communicate specific donation
-          needs more clearly.
-        </p>
+          <div><strong>PantryLink GA</strong><p>Helping Georgia communities give more intentionally.</p></div>
+        </div>
+        <div className="footer-nav">
+          {navItems.map(([id, label]) => <button key={id} onClick={() => navigate(id)}>{label}</button>)}
+          <button onClick={() => navigate("privacy")}>Privacy & Data Deletion</button>
+        </div>
       </div>
-
-      <div className="footerNavGroup">
-        <div className="footerLinks">
-          {navItems.map((item) => (
-            <button key={item.id} type="button" onClick={() => goToPage(item.id)}>
-              {item.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="footerLinks legalFooterLinks">
-          {footerLegalItems.map((item) => (
-            <button key={item.id} type="button" onClick={() => goToPage(item.id)}>
-              {item.label}
-            </button>
-          ))}
-        </div>
+      <div className="footer-bottom">
+        <span>© {new Date().getFullYear()} PantryLink GA</span>
+        <div className="veer-credit"><span className="vb-mark">VB</span><span>Website built by <strong>Veer Bharat</strong></span></div>
       </div>
     </footer>
   );
+}
+
+function HomePage({ navigate }) {
+  return <main>
+    <section className="home-hero">
+      <div className="hero-orb orb-one"/><div className="hero-orb orb-two"/>
+      <div className="shell hero-grid">
+        <div className="hero-copy">
+          <div className="live-pill"><span/> Now live on the iOS App Store</div>
+          <h1>Give what your community <em>actually needs.</em></h1>
+          <p>PantryLink GA helps people find current requests from nearby food pantries, commit to a donation, and follow through—all in one clear place.</p>
+          <div className="hero-actions"><AppStoreButton/><button className="secondary-button" onClick={() => navigate("for-pantries")}>Register your pantry <Icon name="arrow"/></button></div>
+          <div className="hero-proof"><span><Icon name="check"/> Free to use</span><span><Icon name="check"/> Built for Georgia</span><span><Icon name="check"/> Live now</span></div>
+        </div>
+        <div className="hero-showcase">
+          <div className="logo-medallion"><img src={logo} alt="PantryLink logo"/></div>
+          <img className="phone phone-map" src={mapShot} alt="PantryLink map finder"/>
+          <img className="phone phone-main" src={dashboardShot} alt="PantryLink dashboard"/>
+          <div className="floating-card card-needs"><Icon name="box"/><div><b>Specific needs</b><span>See exact items and quantities</span></div></div>
+          <div className="floating-card card-local"><Icon name="map"/><div><b>Local impact</b><span>Find pantries near you</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section className="impact-strip">
+      <div className="shell impact-grid">
+        <div><strong>One app</strong><span>for local pantry needs</span></div>
+        <div><strong>Clear requests</strong><span>with quantities and deadlines</span></div>
+        <div><strong>Real commitments</strong><span>tracked from claim to drop-off</span></div>
+      </div>
+    </section>
+
+    <section className="story-section shell">
+      <div className="story-copy"><span className="kicker">Why PantryLink</span><h2>Donating should not require guessing.</h2><p>Food pantries often receive generous donations, but not always the items they need most at that moment. PantryLink gives organizations a direct way to share current needs and gives donors a simple way to respond.</p><button className="text-button" onClick={() => navigate("how-it-works")}>See how it works <Icon name="arrow"/></button></div>
+      <div className="story-visual">
+        <div className="story-logo"><img src={logo} alt="PantryLink logo"/><strong>Helping pantries share what they need most.</strong></div>
+        <div className="story-card orange"><Icon name="heart"/><b>More useful donations</b><span>People can give based on a real, current request.</span></div>
+        <div className="story-card green"><Icon name="people"/><b>Stronger local connection</b><span>Neighbors can see where their support is needed nearby.</span></div>
+      </div>
+    </section>
+
+    <section className="process-section">
+      <div className="shell"><div className="section-heading centered"><span className="kicker light">Simple from start to finish</span><h2>From nearby need to completed donation.</h2><p>Three clear steps keep the process focused and visible.</p></div>
+      <div className="process-grid">
+        <article className="process-card coral"><span>01</span><div className="process-icon"><Icon name="map"/></div><h3>Discover</h3><p>Find participating pantries and urgent requests near you.</p></article>
+        <article className="process-card mint"><span>02</span><div className="process-icon"><Icon name="box"/></div><h3>Choose</h3><p>Review the exact item, quantity, location, and deadline.</p></article>
+        <article className="process-card gold"><span>03</span><div className="process-icon"><Icon name="check"/></div><h3>Fulfill</h3><p>Claim what you can bring, deliver it, and mark it complete.</p></article>
+      </div></div>
+    </section>
+
+    <section className="screens-section">
+      <div className="shell"><div className="section-heading split"><div><span className="kicker">Inside the app</span><h2>Everything you need to help, in one place.</h2></div><p>Browse needs, find pantries, manage commitments, and personalize how you give through a clean mobile experience.</p></div>
+        <div className="screen-feature">
+          <div className="screen-copy"><span className="screen-number">01</span><h3>See urgent needs as soon as you open the app.</h3><p>The dashboard highlights current requests nearby, including what is needed, how much remains, and when the pantry needs it.</p><ul><li><Icon name="check"/> Current quantities</li><li><Icon name="check"/> Clear deadlines</li><li><Icon name="check"/> Nearby locations</li></ul></div>
+          <div className="screen-art green-art"><img src={dashboardShot} alt="PantryLink dashboard"/></div>
+        </div>
+        <div className="screen-feature reverse">
+          <div className="screen-copy"><span className="screen-number">02</span><h3>Find participating pantries on a map.</h3><p>Map Finder makes it easier to discover local organizations and understand where your support can have an immediate impact.</p><ul><li><Icon name="check"/> Location-based discovery</li><li><Icon name="check"/> Participating pantry markers</li><li><Icon name="check"/> Simple navigation</li></ul></div>
+          <div className="screen-art orange-art"><img src={mapShot} alt="PantryLink map finder"/></div>
+        </div>
+        <div className="mini-screens">
+          {[ [needsShot,"Browse exact requests"], [claimsShot,"Track your commitments"], [profileShot,"Set donation preferences"] ].map(([src,title]) => <article key={title}><div><img src={src} alt={title}/></div><h3>{title}</h3></article>)}
+        </div>
+      </div>
+    </section>
+
+    <section className="pantry-cta">
+      <div className="shell pantry-cta-grid">
+        <div className="cta-logo"><img src={logo} alt="PantryLink logo"/></div>
+        <div><span className="kicker light">For food pantries</span><h2>Share what your organization needs right now.</h2><p>Join PantryLink GA, post current requests, and make it easier for supporters to respond with the items that are actually useful.</p><button className="cream-button" onClick={() => navigate("for-pantries")}>Learn about joining <Icon name="arrow"/></button></div>
+      </div>
+    </section>
+
+    <section className="download-section shell">
+      <div className="download-card"><div><span className="kicker">Available now</span><h2>Start helping through PantryLink GA.</h2><p>Download the app today and explore current pantry needs in your community.</p><AppStoreButton/></div><div className="download-phones"><img src={needsShot} alt="PantryLink needs screen"/><img src={signInShot} alt="PantryLink sign in screen"/></div></div>
+    </section>
+  </main>;
+}
+
+function HowItWorksPage({ navigate }) {
+  const steps = [
+    ["01","Create your account",signInShot,"Sign up, add your location, and choose how you prefer to help."],
+    ["02","Explore nearby needs",mapShot,"Use the dashboard, Needs page, or Map Finder to see active requests."],
+    ["03","Commit to an amount",needsShot,"Claim the quantity you can provide so the pantry and other donors can see the remaining need."],
+    ["04","Complete the drop-off",claimsShot,"Deliver the donation and mark it dropped off once it reaches the organization."],
+  ];
+  return <main>
+    <section className="page-hero how-hero"><div className="shell page-hero-grid"><div><span className="kicker light">How it works</span><h1>A clearer path from good intention to real impact.</h1><p>PantryLink keeps each step simple, from discovering a local need to confirming a completed donation.</p><AppStoreButton light/></div><div className="page-hero-phone"><img src={needsShot} alt="PantryLink needs screen"/></div></div></section>
+    <section className="steps-list shell">{steps.map(([num,title,img,text],i)=><article className={`step-row ${i%2?"reverse":""}`} key={num}><div className="step-copy"><span>{num}</span><h2>{title}</h2><p>{text}</p></div><div className={`step-image step-image-${i+1}`}><img src={img} alt={title}/></div></article>)}</section>
+    <section className="band-cta"><div className="shell"><img src={logo} alt="PantryLink logo"/><div><h2>Ready to try PantryLink GA?</h2><p>The app is available now on the iOS App Store.</p></div><AppStoreButton/></div></section>
+  </main>;
+}
+
+function ForPantriesPage({ navigate }) {
+  const benefits = [
+    ["box","Post specific needs","Share the exact item, amount, and deadline instead of relying on general donation lists."],
+    ["people","See donor commitments","Claims show how much of a request the community has already committed to provide."],
+    ["map","Reach local supporters","Make your organization and its current needs easier to discover through the app."],
+    ["heart","Help shape PantryLink","Your feedback can directly guide the improvements we prioritize next."],
+  ];
+  return <main>
+    <section className="page-hero pantry-hero"><div className="shell page-hero-grid"><div><span className="kicker light">For pantry partners</span><h1>Make your current needs visible to the people ready to help.</h1><p>PantryLink gives food pantries a focused way to post current requests, track donor commitments, and connect with nearby supporters.</p><button className="cream-button" onClick={() => navigate("contact")}>Sign up as a pantry <Icon name="arrow"/></button></div><div className="pantry-hero-art"><div className="big-logo"><img src={logo} alt="PantryLink logo"/></div><img src={needsShot} alt="PantryLink needs screen"/></div></div></section>
+    <section className="partner-benefits"><div className="shell"><div className="partner-heading"><div><span className="kicker light">Built for useful action</span><h2>More than another donation list.</h2></div><div className="partner-logo-card"><img src={logo} alt="PantryLink logo"/><span>Current needs. Clear commitments. Local support.</span></div></div><div className="benefit-grid">{benefits.map(([icon,title,text],i)=><article className={`benefit-card b${i+1}`} key={title}><div className="benefit-icon"><Icon name={icon}/></div><span>0{i+1}</span><h3>{title}</h3><p>{text}</p></article>)}</div></div></section>
+    <section className="partner-process shell"><div className="section-heading centered"><span className="kicker">Getting started</span><h2>Joining is simple.</h2></div><div className="partner-steps"><article><b>1</b><h3>Tell us about your pantry</h3><p>Use the interest form to share your organization and contact information.</p></article><article><b>2</b><h3>Create your pantry profile</h3><p>Set up your organization so community members can identify and locate you.</p></article><article><b>3</b><h3>Begin posting needs</h3><p>Add specific requests and update them as your inventory and priorities change.</p></article></div></section>
+    <section className="feedback-section"><div className="shell feedback-grid"><div className="feedback-phone"><img src={settingsShot} alt="PantryLink account settings"/></div><div><span className="kicker light">Early pantry partners</span><h2>Your feedback matters.</h2><p>PantryLink is live, but we are still improving it alongside the organizations it is meant to serve. Pantry partners can help us understand what is clear, what is missing, and what would make the platform more useful.</p><button className="cream-button" onClick={() => navigate("contact")}>Contact PantryLink <Icon name="arrow"/></button></div></div></section>
+  </main>;
+}
+
+function ContactPage() {
+  return <main>
+    <section className="page-hero contact-hero"><div className="shell contact-hero-grid"><div><span className="kicker light">Contact PantryLink</span><h1>Join the platform or get in touch.</h1><p>Food pantries can use this form to express interest in joining. You can also contact us with app feedback, questions, or support needs.</p><a className="mail-link" href={`mailto:${SUPPORT_EMAIL}`}><Icon name="mail"/>{SUPPORT_EMAIL}</a></div><div className="contact-logo"><img src={logo} alt="PantryLink logo"/><span>Helping pantries share what they need most.</span></div></div></section>
+    <section className="contact-section shell"><div className="form-intro"><span className="kicker">Pantry interest and support</span><h2>Send us a message.</h2><p>Complete the form below and we will follow up using the contact information you provide.</p></div><div className="form-frame"><iframe src={CONTACT_FORM_URL} title="PantryLink contact form">Loading…</iframe></div></section>
+  </main>;
+}
+
+function PrivacyPage() {
+  const cards = [
+    ["Information you provide","When you create or update an account, PantryLink may receive information such as your name, email address, phone number, location, donation preferences, and other profile details you choose to provide."],
+    ["How information is used","Information may be used to operate the app, display relevant pantry requests, support user accounts, process claims, improve the service, and respond to support requests."],
+    ["Location information","Location information may be used to show nearby pantry requests and map results. The precise information available depends on the permissions and settings you choose on your device."],
+    ["Pantry and donation activity","The app may store information connected to pantry requests, donation claims, committed amounts, drop-off status, and related activity needed to provide the service."],
+    ["Notifications","When enabled, PantryLink may send alerts about urgent local needs or important account activity. Notification settings can be changed in the app or through your device settings."],
+    ["Data sharing","PantryLink does not sell personal information. Information may be shared with service providers only when reasonably necessary to operate, maintain, secure, or improve the platform."],
+    ["Data security","Reasonable safeguards are used to protect account and app information. No online system can guarantee absolute security, so users should also protect their passwords and devices."],
+    ["Children’s privacy","PantryLink is not intended to knowingly collect personal information from children in violation of applicable law. Contact us if you believe such information has been provided."],
+  ];
+  return <main>
+    <section className="privacy-hero"><div className="shell privacy-hero-grid"><div><span className="kicker light">Privacy & data deletion</span><h1>Your information should be understandable and manageable.</h1><p>This page explains the general types of information PantryLink may use and how users can request account deletion.</p><span className="updated-pill">Last updated: July 19, 2026</span></div><div className="privacy-brand"><img src={logo} alt="PantryLink logo"/><strong>PantryLink GA</strong><span>Privacy and account controls</span></div></div></section>
+    <section className="privacy-layout shell">
+      <aside className="delete-panel"><div className="delete-icon"><Icon name="trash"/></div><span className="kicker">Delete your account</span><h2>Account deletion is available inside the app.</h2><p>Open PantryLink GA and follow:</p><div className="delete-path"><span>Account</span><b>→</b><span>Delete Account</span></div><p>You may also email us from the address connected to your account and request deletion.</p><a href={`mailto:${SUPPORT_EMAIL}?subject=PantryLink%20Account%20Deletion%20Request`}><Icon name="mail"/> Email deletion request</a></aside>
+      <div className="privacy-content"><div className="privacy-intro"><Icon name="shield"/><div><h2>Privacy overview</h2><p>We aim to collect and use only the information reasonably needed to operate PantryLink and connect people with local pantry needs.</p></div></div><div className="privacy-cards">{cards.map(([title,text],i)=><article key={title}><span>{String(i+1).padStart(2,"0")}</span><h3>{title}</h3><p>{text}</p></article>)}</div><div className="privacy-contact"><div><span className="kicker light">Questions or requests</span><h2>Contact PantryLink</h2><p>For privacy questions, corrections, or account deletion support, email us directly.</p></div><a href={`mailto:${SUPPORT_EMAIL}`}><Icon name="mail"/>{SUPPORT_EMAIL}</a></div></div>
+    </section>
+  </main>;
+}
+
+function App() {
+  const valid = ["home","how-it-works","for-pantries","contact","privacy"];
+  const readHash = () => { const value = window.location.hash.replace("#",""); return valid.includes(value) ? value : "home"; };
+  const [page,setPage] = useState(readHash);
+  useEffect(() => { const onHash = () => { setPage(readHash()); window.scrollTo({top:0,behavior:"smooth"}); }; window.addEventListener("hashchange",onHash); return () => window.removeEventListener("hashchange",onHash); },[]);
+  useEffect(() => { if (!window.location.hash) window.history.replaceState(null,"","#home"); },[]);
+  const navigate = (id) => { if (window.location.hash === `#${id}`) window.scrollTo({top:0,behavior:"smooth"}); else window.location.hash = id; };
+  let content = <HomePage navigate={navigate}/>;
+  if (page === "how-it-works") content = <HowItWorksPage navigate={navigate}/>;
+  if (page === "for-pantries") content = <ForPantriesPage navigate={navigate}/>;
+  if (page === "contact") content = <ContactPage/>;
+  if (page === "privacy") content = <PrivacyPage/>;
+  return <div className="site-app"><Header page={page} navigate={navigate}/>{content}<Footer navigate={navigate}/></div>;
 }
 
 export default App;
